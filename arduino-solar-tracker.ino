@@ -129,20 +129,23 @@ void loop() {
   }
 
   //Check boundaries
-  if(pos_vertical > PITCH_LIMIT_HIGH)
-    pos_vertical=PITCH_LIMIT_HIGH;
-  else if(pos_vertical<PITCH_LIMIT_LOW)
-      pos_vertical=PITCH_LIMIT_LOW;
-      
-  if(pos_horizontal > YAW_LIMIT_HIGH)
-      pos_horizontal=YAW_LIMIT_HIGH;
-  else if(pos_horizontal<YAW_LIMIT_LOW)
-      pos_horizontal=YAW_LIMIT_LOW;
+  if (pos_pitch > PITCH_LIMIT_HIGH)
+    pos_pitch = PITCH_LIMIT_HIGH;
+  else if (pos_pitch < PITCH_LIMIT_LOW)
+    pos_pitch = PITCH_LIMIT_LOW;
 
-  servo_rightleft.read()==pos_horizontal? delay(10):servo_rightleft.write(pos_horizontal);
-  
-   servo_updown.read()==pos_horizontal? delay(10):servo_updown.write(pos_vertical);
-  
+  if (pos_yaw > YAW_LIMIT_HIGH)
+    pos_yaw = YAW_LIMIT_HIGH;
+  else if (pos_yaw < YAW_LIMIT_LOW)
+    pos_yaw = YAW_LIMIT_LOW;
+
+  //
+//       Serial.print("yaw ");
+//     Serial.print(pos_yaw);
+//     Serial.print(" ");
+//     Serial.print("pitch ");
+//     Serial.println(pos_pitch);
+//     
   servo_yaw.read() == pos_yaw ? void() : servo_yaw.write(pos_yaw);
   servo_pitch.read() == pos_yaw ? void() : servo_pitch.write(pos_pitch);
 
