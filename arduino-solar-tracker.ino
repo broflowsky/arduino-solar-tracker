@@ -1,8 +1,8 @@
 #include <Servo.h>
 
-#define FILTER_SPEED 3.0  //For smoothness, just an averaging filter
+#define FILTER_SPEED 5.0  //For smoothness, just an averaging filter
 #define INV_FILTER_SPEED 1/FILTER_SPEED //that would work
-#define THRESH 30 //threshold value for the delta-amplitude for up-down and left-right photoresistor
+#define THRESH 20 //threshold value for the delta-amplitude for up-down and left-right photoresistor
 #define NUM_PHOTORESISTORS 4 //number of photoresistors
 
 #define PITCH_MOTOR 4 //Digital pin out Nano33 BLE  PITCH => Vertical
@@ -45,22 +45,21 @@ short pos_pitch;
 void setup() {
   //Debugging only, Serial will be needed to communicate with the raspberry Pi
   Serial.begin(9600);
-  Serial.println("Starting");
-
+ 
   for (int i = 0; i < 4; ++i) {
     readings[i] = analogRead(R[i]);
     pinMode(L[i], OUTPUT);
     delay(10);
   }
-  
+
   //Servos setup
   servo_pitch.attach(PITCH_MOTOR);
-  servo_yaw.attach(YAW_MOTOR); 
+  servo_yaw.attach(YAW_MOTOR);
 
   //Initial servos position (degrees), correspond to middle
-  pos_pitch = pos_yaw = 90;
+  pos_pitch = pos_yaw = 45;
 
- 
+
   delay(1000);
   StartupSequence();
 }
@@ -68,15 +67,15 @@ void setup() {
 void loop() {
 
   //Find the photoresistor that receives the most light
+
   byte largest = 0;
   for (byte i = 0; i < 4; ++i)
   { //Low-pass filter on the readings for smoothness
     readings[i] = ( readings[i] * (FILTER_SPEED - 1.0) + ((float)analogRead(R[i]))) * INV_FILTER_SPEED;
     if (readings[i] > readings[largest])
       largest = i;
-    //Serial.println(readings[i]);
-    //delay(10);
   }
+
 
   //Fire up LED corresponding to most lit photoresistor
   //turning off the others
@@ -104,23 +103,23 @@ void loop() {
   //    }
   //    Serial.println(" ");
   //
-  Serial.print("avgT ");
-  Serial.print(avgT);
-  Serial.print(", ");
-  Serial.print("avgB ");
-  Serial.print(avgB);
-  Serial.print(", ");
-  Serial.print("avgL ");
-  Serial.print(avgL);
-  Serial.print(", ");
-  Serial.print("avgR ");
-  Serial.println(avgR);
+//  Serial.print("avgT ");
+//  Serial.print(avgT);
+//  Serial.print(", ");
+//  Serial.print("avgB ");
+//  Serial.print(avgB);
+//  Serial.print(", ");
+//  Serial.print("avgL ");
+//  Serial.print(avgL);
+//  Serial.print(", ");
+//  Serial.print("avgR ");
+//  Serial.println(avgR);
 
-  //  Serial.print("pitch difference: ");
-  //  Serial.print(pitch_diff);
-  //  Serial.print(",");
-  //  Serial.print("yaw difference: ");
-  //  Serial.println(yaw_diff);
+      Serial.print("pitch_difference: ");
+      Serial.print(pitch_diff);
+      Serial.print(", ");
+      Serial.print("yaw_difference: ");
+      Serial.println(yaw_diff);
 
 
   ////////////////Move servos if needed////////////////
@@ -170,13 +169,19 @@ void StartupSequence() {
   for (int i = 0; i < 4; ++i)
   {
     digitalWrite(L[i], HIGH);
-    delay(100);
+    delay(250);
   }
   //Check extreme tracker positions
+
+  servo_pitch.write(PITCH_LIMIT_LOW);
+  servo_yaw.write(YAW_LIMIT_LOW);
+  delay(1000);
+
   servo_pitch.write(PITCH_LIMIT_HIGH);
   servo_yaw.write(YAW_LIMIT_HIGH);
-
   delay(1000);
+
+  //Turn off LEDs
   for (int i = 0; i < 4; ++i)
   {
     digitalWrite(L[i], LOW);
