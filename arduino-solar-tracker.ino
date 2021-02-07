@@ -13,7 +13,11 @@
 #define YAW_LIMIT_LOW 0
 
 
-
+//reset function
+//pure virtual function pointer that returns void and takes void as argument
+//used in the bootloader
+// call resetFunc(); to soft reset the arduino
+void (*resetFunc) (void) = 0x0000;
 void StartupSequence();
 
 //nano 33 BLE pinout, photoresistors
