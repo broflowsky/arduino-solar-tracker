@@ -61,11 +61,17 @@ void setup() {
   servo_yaw.attach(YAW_MOTOR);
 
   //Initial servos position (degrees), correspond to middle
-  pos_pitch = pos_yaw = 45;
-
+  //pos_pitch = pos_yaw = 45;
+  
 
   delay(1000);
-  StartupSequence();
+  pos_pitch = servo_pitch.read();
+  pos_yaw = servo_yaw.read();
+
+  Serial.println(pos_pitch);
+  Serial.println(pos_yaw);
+  
+ // StartupSequence();
 }
 
 void loop() {
@@ -79,7 +85,6 @@ void loop() {
     if (readings[i] > readings[largest])
       largest = i;
   }
-
 
   //Fire up LED corresponding to most lit photoresistor
   //turning off the others
@@ -119,11 +124,11 @@ void loop() {
 //  Serial.print("avgR ");
 //  Serial.println(avgR);
 
-      Serial.print("pitch_difference: ");
-      Serial.print(pitch_diff);
-      Serial.print(", ");
-      Serial.print("yaw_difference: ");
-      Serial.println(yaw_diff);
+//      Serial.print("pitch_difference: ");
+//      Serial.print(pitch_diff);
+//      Serial.print(", ");
+//      Serial.print("yaw_difference: ");
+//      Serial.println(yaw_diff);
 
 
   ////////////////Move servos if needed////////////////
@@ -170,32 +175,43 @@ void loop() {
 void StartupSequence() {
 
   //Turn on LEDs
-  for (int i = 0; i < 4; ++i)
-  {
-    digitalWrite(L[i], HIGH);
-    delay(250);
-  }
+//  for (int i = 0; i < 4; ++i)
+//  {
+//    digitalWrite(L[i], HIGH);
+//    delay(250);
+//  }
   //Check extreme tracker positions
-
-  servo_pitch.write(PITCH_LIMIT_LOW);
-  servo_yaw.write(YAW_LIMIT_LOW);
-  delay(1000);
-
-  servo_pitch.write(PITCH_LIMIT_HIGH);
-  servo_yaw.write(YAW_LIMIT_HIGH);
-  delay(1000);
-
-  //Turn off LEDs
-  for (int i = 0; i < 4; ++i)
-  {
-    digitalWrite(L[i], LOW);
-    delay(250);
+//  byte init_pitch = servo_pitch.read();
+//  byte init_yaw = servo;
+  for(int i=PITCH_LIMIT_LOW;i<PITCH_LIMIT_HIGH;++i){
+    servo_pitch.write(i);
+    delay(20);
   }
 
-  //Set them to default position
-  servo_pitch.write(pos_pitch);
-  servo_yaw.write(pos_yaw);
-
-  delay(500);
+  for(int i=YAW_LIMIT_LOW;i<YAW_LIMIT_HIGH;++i){
+    servo_yaw.write(i);
+    delay(20);
+  }
+  
+//  servo_pitch.write(PITCH_LIMIT_LOW);
+//  servo_yaw.write(YAW_LIMIT_LOW);
+//  delay(1000);
+//
+//  servo_pitch.write(PITCH_LIMIT_HIGH);
+//  servo_yaw.write(YAW_LIMIT_HIGH);
+//  delay(1000);
+//
+//  //Turn off LEDs
+//  for (int i = 0; i < 4; ++i)
+//  {
+//    digitalWrite(L[i], LOW);
+//    delay(250);
+//  }
+//
+//  //Set them to default position
+//  servo_pitch.write(pos_pitch);
+//  servo_yaw.write(pos_yaw);
+//
+//  delay(500);
 
 }
