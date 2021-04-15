@@ -1,9 +1,10 @@
 #include <Servo.h>
 
-#define FILTER_SPEED 5.0  //For smoothness, just an averaging filter
+#define FILTER_SPEED 2.0  //For smoothness, just an averaging filter
 #define INV_FILTER_SPEED 1/FILTER_SPEED //that would work
 #define THRESH 20 //threshold value for the delta-amplitude for up-down and left-right photoresistor
 #define NUM_PHOTORESISTORS 4 //number of photoresistors
+#define LOOP_DELAY 50
 
 #define PITCH_MOTOR 4 //Digital pin out Nano33 BLE  PITCH => Vertical
 #define YAW_MOTOR 3 //Digital pin out Nano33 BLE    YAW => Horizontal
@@ -11,6 +12,7 @@
 #define YAW_LIMIT_HIGH 180
 #define PITCH_LIMIT_LOW 0
 #define YAW_LIMIT_LOW 0
+
 
 
 //reset function
@@ -49,29 +51,21 @@ short pos_pitch;
 void setup() {
   //Debugging only, Serial will be needed to communicate with the raspberry Pi
   Serial.begin(9600);
- 
+
   for (int i = 0; i < 4; ++i) {
     readings[i] = analogRead(R[i]);
     pinMode(L[i], OUTPUT);
-    delay(10);
+    delay(20);
   }
 
   //Servos setup
   servo_pitch.attach(PITCH_MOTOR);
   servo_yaw.attach(YAW_MOTOR);
 
-  //Initial servos position (degrees), correspond to middle
-  //pos_pitch = pos_yaw = 45;
-  
 
-  delay(1000);
+  //Initial servos position (degrees), correspond to middle
   pos_pitch = servo_pitch.read();
   pos_yaw = servo_yaw.read();
-
-  Serial.println(pos_pitch);
-  Serial.println(pos_yaw);
-  
- // StartupSequence();
 }
 
 void loop() {
@@ -88,11 +82,11 @@ void loop() {
 
   //Fire up LED corresponding to most lit photoresistor
   //turning off the others
-  for (byte i = 0; i < 4; ++i) {
-    if (i == largest)
-      digitalWrite(L[i], HIGH);
-    else digitalWrite(L[i], LOW);
-  }
+//  for (byte i = 0; i < 4; ++i) {
+//    if (i == largest)
+//      digitalWrite(L[i], HIGH);
+//    else digitalWrite(L[i], LOW);
+//  }
 
   //find direction for servos
   int avgT = (readings[0] + readings[1]) * .5;
@@ -105,30 +99,24 @@ void loop() {
 
   //Serial plot for debugging
   //
-  //    for(int i =0; i<4;++i){
-  //      Serial.print(readings[i]);
-  //      //Serial.print(map(readings[i],0,1023,0,3.3));
-  //      Serial.print(",");
-  //    }
-  //    Serial.println(" ");
-  //
-//  Serial.print("avgT ");
-//  Serial.print(avgT);
-//  Serial.print(", ");
-//  Serial.print("avgB ");
-//  Serial.print(avgB);
-//  Serial.print(", ");
-//  Serial.print("avgL ");
-//  Serial.print(avgL);
-//  Serial.print(", ");
-//  Serial.print("avgR ");
-//  Serial.println(avgR);
 
-//      Serial.print("pitch_difference: ");
-//      Serial.print(pitch_diff);
-//      Serial.print(", ");
-//      Serial.print("yaw_difference: ");
-//      Serial.println(yaw_diff);
+    Serial.print("avgT ");
+    Serial.print(avgT);
+    Serial.print(", ");
+    Serial.print("avgB ");
+    Serial.print(avgB);
+    Serial.print(", ");
+    Serial.print("avgL ");
+    Serial.print(avgL);
+    Serial.print(", ");
+    Serial.print("avgR ");
+    Serial.println(avgR);
+
+  //  Serial.print("pitch_difference: ");
+  //  Serial.print(pitch_diff);
+  //  Serial.print(", ");
+  //  Serial.print("yaw_difference: ");
+  //  Serial.println(yaw_diff);
 
 
   ////////////////Move servos if needed////////////////
@@ -159,59 +147,26 @@ void loop() {
     pos_yaw = YAW_LIMIT_LOW;
 
 
-  //       Serial.print("yaw ");
-  //     Serial.print(pos_yaw);
-  //     Serial.print(" ");
-  //     Serial.print("pitch ");
-  //     Serial.println(pos_pitch);
-  //
+
   ///////////////Check whether current position is different from newly calculated position//////
 
   servo_yaw.read() == pos_yaw ? void() : servo_yaw.write(pos_yaw);
   servo_pitch.read() == pos_yaw ? void() : servo_pitch.write(pos_pitch);
 
-  delay(10);
+  delay(LOOP_DELAY);
 }
-void StartupSequence() {
+void MoveMotor(Servo &servo, byte stepDelay, byte newPos) {
+  byte oldPos = servo.read();
+  if (oldPos < newPos)
+    for (byte i = servo.read(); i < newPos; ++i) {
+      servo.write(i);
+      delay(stepDelay);
+    }
+  else for (byte i = servo.read(); i > newPos; --i) {
+      servo.write(i);
+      delay(stepDelay);
+    }
 
-  //Turn on LEDs
-//  for (int i = 0; i < 4; ++i)
-//  {
-//    digitalWrite(L[i], HIGH);
-//    delay(250);
-//  }
-  //Check extreme tracker positions
-//  byte init_pitch = servo_pitch.read();
-//  byte init_yaw = servo;
-  for(int i=PITCH_LIMIT_LOW;i<PITCH_LIMIT_HIGH;++i){
-    servo_pitch.write(i);
-    delay(20);
-  }
 
-  for(int i=YAW_LIMIT_LOW;i<YAW_LIMIT_HIGH;++i){
-    servo_yaw.write(i);
-    delay(20);
-  }
-  
-//  servo_pitch.write(PITCH_LIMIT_LOW);
-//  servo_yaw.write(YAW_LIMIT_LOW);
-//  delay(1000);
-//
-//  servo_pitch.write(PITCH_LIMIT_HIGH);
-//  servo_yaw.write(YAW_LIMIT_HIGH);
-//  delay(1000);
-//
-//  //Turn off LEDs
-//  for (int i = 0; i < 4; ++i)
-//  {
-//    digitalWrite(L[i], LOW);
-//    delay(250);
-//  }
-//
-//  //Set them to default position
-//  servo_pitch.write(pos_pitch);
-//  servo_yaw.write(pos_yaw);
-//
-//  delay(500);
 
 }
