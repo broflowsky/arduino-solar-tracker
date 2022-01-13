@@ -151,7 +151,7 @@ void loop() {
   ///////////////Check whether current position is different from newly calculated position//////
 
   servo_yaw.read() == pos_yaw ? void() : servo_yaw.write(pos_yaw);
-  servo_pitch.read() == pos_yaw ? void() : servo_pitch.write(pos_pitch);
+  servo_pitch.read() == pos_pitch ? void() : servo_pitch.write(pos_pitch);
 
   delay(LOOP_DELAY);
 }
